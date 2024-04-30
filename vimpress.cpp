@@ -58,7 +58,23 @@ void VimPress::statusline() {
   attroff(A_REVERSE);
 }
 
-void VimPress::input(int c){
+void VimPress::input(int c) {
+
+  switch (c){
+    case KEY_UP:
+      up();
+      return;
+    case KEY_LEFT:
+      left();
+      return;
+    case KEY_RIGHT:
+      right();
+      return;
+    case KEY_DOWN:
+      down();
+      return;
+  }
+
   switch (mode){
     case 27:
     case 'n':
@@ -81,12 +97,12 @@ void VimPress::input(int c){
           break;
         case 127:
         case KEY_BACKSPACE:
-          if( x == 0 && y > 0){
+          if( x == 0 && y > 0) {
             x = lines[y - 1].length();
             lines[y - 1] += lines[y];
             m_remove(y);
             // up();
-          }else if(x > 0){
+          } else if (x > 0) {
             lines[y].erase(--x, 1);
           }
           break;
@@ -99,9 +115,9 @@ void VimPress::input(int c){
   }
 }
 
-void VimPress::print(){
+void VimPress::print() {
   for (size_t i {}; i < (size_t)LINES - 1; ++i) {
-    if(i >= lines.size()){
+    if (i >= lines.size()) {
       move(i, 0);
       clrtoeol();
     } else {
@@ -114,21 +130,55 @@ void VimPress::print(){
   move(y, x);
 }
 
-void VimPress::m_remove(int number){
+void VimPress::m_remove(int number) {
   lines.erase(lines.begin() + number);
 }
 
-std::string VimPress::m_tabs(std::string& line){
+std::string VimPress::m_tabs(std::string& line) {
   std::size_t tab = line.find('\t');
   return tab == line.npos ? line : m_tabs(line.replace(tab, 1, "  "));
 }
 
-void VimPress::m_insert(std::string line, int number){
+void VimPress::m_insert(std::string line, int number) {
   line = m_tabs(line);
   lines.insert(lines.begin() + number, line);
 }
 
-void VimPress::m_append(std::string& line){
+void VimPress::m_append(std::string& line) {
   line = m_tabs(line);
   lines.push_back(line);
+}
+
+void VimPress::up() {
+  if (y > 0) {
+    --y;
+  }
+  if ( x >= lines[y].length()) {
+    x = lines[y].length();
+  }
+  move(y, x);
+}
+
+void VimPress::left() {
+  if (x > 0) {
+    --x;
+    move(y, x);
+  }
+}
+
+void VimPress::right() {
+  if ( (int)x <= COLS && x <= lines[y].length() - 1) {
+    ++x;
+    move(y, x);
+  }
+}
+
+void VimPress::down() {
+  if ( (int)y < LINES && y < lines.size() - 1) {
+    ++y;
+  }
+  if ( x >= lines[y].length()) {
+    x = lines[y].length();
+  }
+  move(y, x);
 }

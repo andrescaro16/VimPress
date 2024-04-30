@@ -7,7 +7,7 @@
 #include <vector>
 
 class VimPress {
-  int x, y;
+  size_t x, y;
   char mode;
   std::string filename, status;
   std::vector<std::string> lines;
@@ -27,8 +27,19 @@ class VimPress {
     void run();
 
   protected:
+    // Update the screen (handle status)
     void update();
     void statusline();
+    
+    // Handle modes and input
     void input(int);
+    
+    // Print the lines
     void print();
+    
+    // Move the cursor
+    void up();
+    void left();
+    void right();
+    void down();
 };
