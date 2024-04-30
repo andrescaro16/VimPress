@@ -16,6 +16,9 @@ VimPress::VimPress(const std::string &file) {
     filename = file;
   }
 
+  // Initialize the section for the status line
+  section = {};
+
   // Initialize ncurses
   initscr();
   noecho();
@@ -50,10 +53,17 @@ void VimPress::update() {
     case 'q':
       break;
   }
+  section = " COLS: " + std::to_string(x) + " | ROWS: " + std::to_string(y) + " | FILE: " + filename + " ";
+  status.insert(0, " "); // initial SPACE for `status`
+  // status.insert(status.length(), " "); // final SPACE for `status`
 }
 
 void VimPress::statusline() {
   attron(A_REVERSE);
+  for (int i {}; i < COLS; ++i) {
+    mvprintw(LINES - 1, i, " "); 
+  }
+  mvprintw( LINES - 1, COLS - section.length(), &section[0]);
   mvprintw(LINES - 1, 0, status.c_str());
   attroff(A_REVERSE);
 }
