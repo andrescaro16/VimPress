@@ -79,6 +79,17 @@ void VimPress::input(int c){
         case 27:
           mode = 'n';
           break;
+        case 127:
+        case KEY_BACKSPACE:
+          if( x == 0 && y > 0){
+            x = lines[y - 1].length();
+            lines[y - 1] += lines[y];
+            m_remove(y);
+            // up();
+          }else if(x > 0){
+            lines[y].erase(--x, 1);
+          }
+          break;
         default:
           lines[y].insert(x, 1, c);
           x++;
@@ -101,4 +112,23 @@ void VimPress::print(){
   // Move the cursor to the current position
   // move(row, column)
   move(y, x);
+}
+
+void VimPress::m_remove(int number){
+  lines.erase(lines.begin() + number);
+}
+
+std::string VimPress::m_tabs(std::string& line){
+  std::size_t tab = line.find('\t');
+  return tab == line.npos ? line : m_tabs(line.replace(tab, 1, "  "));
+}
+
+void VimPress::m_insert(std::string line, int number){
+  line = m_tabs(line);
+  lines.insert(lines.begin() + number, line);
+}
+
+void VimPress::m_append(std::string& line){
+  line = m_tabs(line);
+  lines.push_back(line);
 }
