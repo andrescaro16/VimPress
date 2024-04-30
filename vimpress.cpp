@@ -117,6 +117,11 @@ void VimPress::input(int c) {
           break;
         case 'w':
           mode = 'w';
+          save();
+          refresh();
+          endwin();
+          printf("%s saved.\n", filename.c_str());
+          exit(0);
           break;
       }
       break;
@@ -249,10 +254,25 @@ void VimPress::open() {
         m_append(buffer);
       }
     } else {
-      throw std::runtime_error("Cannot open file. Permission denied.");
+      throw std::runtime_error("File can not be open. Permission denied.");
     }
   } else {
     std::string str {};
     m_append(str);
+  }
+}
+
+void VimPress::save(){
+  std::ofstream ofile(filename);
+  if ( ofile.is_open() ) {
+    for (size_t i {}; i < lines.size(); ++i) {
+     ofile << lines[i] << std::endl;
+    }
+    ofile.close();
+  } else {
+    refresh();
+    endwin();
+    std::printf("File can not be saved.\n");
+    exit(0);
   }
 }

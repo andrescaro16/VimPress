@@ -47,4 +47,5 @@ class VimPress {
 
     // File operations
     void open();
+    void save();
 };
