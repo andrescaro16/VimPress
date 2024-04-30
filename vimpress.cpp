@@ -32,7 +32,8 @@ void VimPress::run() {
   while(mode != 'q'){
     update();
     statusline();
-    mode = getch();
+    int c = getch();
+    input(c);
   }
 }
 
@@ -56,4 +57,39 @@ void VimPress::statusline() {
   // move(LINES - 1, 0);
   // addstr(status.c_str());
   attroff(A_REVERSE);
+}
+
+void VimPress::input(int c){
+  switch (mode){
+    case 27:
+    case 'n':
+      switch (c){
+        case 'q':
+          mode = 'q';
+          break;
+        case 'i':
+          mode = 'i';
+          break;
+        case 'w':
+          mode = 'w';
+          break;
+      }
+      break;
+    case 'i':
+      switch (c){
+        case 27:
+          mode = 'n';
+          break;
+        default:
+          std::string s(1, c);
+          lines.push_back(s);
+          break;
+      }
+      break;
+  }
+  for (size_t i {}; i < lines.size(); ++i) {
+    mvprintw(0, i, lines[i].c_str()); 
+    // move(i, 0);
+    // addstr(lines[i].c_str());
+  }
 }

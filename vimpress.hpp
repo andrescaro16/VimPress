@@ -20,4 +20,5 @@ class VimPress {
   protected:
     void update();
     void statusline();
+    void input(int);
 };
