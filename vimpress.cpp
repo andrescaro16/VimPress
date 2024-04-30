@@ -32,6 +32,7 @@ void VimPress::run() {
   while(mode != 'q'){
     update();
     statusline();
+    print();
     int c = getch();
     input(c);
   }
@@ -54,8 +55,6 @@ void VimPress::update() {
 void VimPress::statusline() {
   attron(A_REVERSE);
   mvprintw(LINES - 1, 0, status.c_str());
-  // move(LINES - 1, 0);
-  // addstr(status.c_str());
   attroff(A_REVERSE);
 }
 
@@ -81,15 +80,25 @@ void VimPress::input(int c){
           mode = 'n';
           break;
         default:
-          std::string s(1, c);
-          lines.push_back(s);
+          lines[y].insert(x, 1, c);
+          x++;
           break;
       }
       break;
   }
-  for (size_t i {}; i < lines.size(); ++i) {
-    mvprintw(0, i, lines[i].c_str()); 
-    // move(i, 0);
-    // addstr(lines[i].c_str());
+}
+
+void VimPress::print(){
+  for (size_t i {}; i < (size_t)LINES - 1; ++i) {
+    if(i >= lines.size()){
+      move(i, 0);
+      clrtoeol();
+    } else {
+      mvprintw(i, 0, lines[i].c_str());
+    }
+    clrtoeol();
   }
+  // Move the cursor to the current position
+  // move(row, column)
+  move(y, x);
 }

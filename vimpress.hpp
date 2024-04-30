@@ -21,4 +21,5 @@ class VimPress {
     void update();
     void statusline();
     void input(int);
+    void print();
 };
