@@ -7,11 +7,17 @@
 #include <vector>
 
 class VimPress {
-  std::string filename;
+  int x, y;
+  char mode;
+  std::string filename, status;
   std::vector<std::string> lines;
 
   public:
     VimPress(const std::string &);
     ~VimPress();
     void run();
+
+  protected:
+    void update();
+    void statusline();
 };
