@@ -24,6 +24,7 @@ VimPress::VimPress(const std::string &file) {
   noecho();
   cbreak();
   keypad(stdscr, true);
+  use_default_colors();
 }
 
 VimPress::~VimPress() {
@@ -59,12 +60,28 @@ void VimPress::update() {
 }
 
 void VimPress::statusline() {
+
+  start_color();
+  init_color(COLOR_BLACK, 0, 0, 0);
+  init_color(COLOR_GREEN, 0, 500, 0);
+  if (mode == 'n') {
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
+  } else {
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);
+  }
+
   attron(A_REVERSE);
+  attron(A_BOLD);
+  attron(COLOR_PAIR(1));
+
   for (int i {}; i < COLS; ++i) {
     mvprintw(LINES - 1, i, " "); 
   }
   mvprintw( LINES - 1, COLS - section.length(), &section[0]);
   mvprintw(LINES - 1, 0, status.c_str());
+
+  attroff(COLOR_PAIR(1));
+  attroff(A_BOLD);
   attroff(A_REVERSE);
 }
 
