@@ -19,6 +19,9 @@ VimPress::VimPress(const std::string &file) {
   // Initialize the section for the status line
   section = {};
 
+  // Open the file
+  open();
+
   // Initialize ncurses
   initscr();
   noecho();
@@ -234,4 +237,22 @@ void VimPress::down() {
     x = lines[y].length();
   }
   move(y, x);
+}
+
+void VimPress::open() {
+  if (std::filesystem::exists(filename)) {
+    std::ifstream ifile(filename);
+    if (ifile.is_open()) {
+      while (!ifile.eof()) {
+        std::string buffer;
+        std::getline(ifile, buffer);
+        m_append(buffer);
+      }
+    } else {
+      throw std::runtime_error("Cannot open file. Permission denied.");
+    }
+  } else {
+    std::string str {};
+    m_append(str);
+  }
 }

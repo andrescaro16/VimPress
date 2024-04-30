@@ -5,6 +5,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <filesystem>
+#include <fstream>
 
 class VimPress {
   size_t x, y;
@@ -42,4 +44,7 @@ class VimPress {
     void left();
     void right();
     void down();
+
+    // File operations
+    void open();
 };
