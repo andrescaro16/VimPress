@@ -97,14 +97,32 @@ void VimPress::input(int c) {
           break;
         case 127:
         case KEY_BACKSPACE:
-          if( x == 0 && y > 0) {
+          if ( x == 0 && y > 0) {
             x = lines[y - 1].length();
             lines[y - 1] += lines[y];
             m_remove(y);
-            // up();
+            up();
           } else if (x > 0) {
             lines[y].erase(--x, 1);
           }
+          break;
+        case KEY_DC:
+          if ( x == lines[y].length() && y != lines.size() - 1) {
+            lines[y] += lines[y + 1];
+          } else {
+            lines[y].erase(x, 1);
+          }
+          break;
+        case KEY_ENTER:
+        case 10:
+          if (x < lines[y].length()) {
+            m_insert(lines[y].substr(x, lines[y].length() - x), y + 1); 
+            lines[y].erase(x, lines[y].length() - x);
+          } else {
+            m_insert("", y + 1);
+          }
+          x = 0;
+          down();
           break;
         default:
           lines[y].insert(x, 1, c);
