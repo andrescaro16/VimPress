@@ -1,9 +1,6 @@
 #include "vimpress.hpp"
 
 VimPress::VimPress(const std::string &file) {
-  // We avoid a segmentation fault by adding an empty string to the vector
-  lines.push_back("");
-
   // Initialize the cursor position and mode
   x = y = 0;
   mode = 'n';
