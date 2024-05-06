@@ -1,11 +1,12 @@
 #include "vimpress.hpp"
+#include <iostream>
 
-VimPress::VimPress(const std::string &file) {
+VimPress::VimPress(const std::string &file, HuffmanCoding& huffmanObj, const std::string &openWithDecompressArg) : huffman(huffmanObj) {
   // Initialize the cursor position and mode
   x = y = 0;
   mode = 'n';
   status = "NORMAL";
-
+  openWithDecompress = openWithDecompressArg;
   // Default filename if no file is provided
   if (file.empty()) {
     filename = "untitled";
@@ -114,10 +115,18 @@ void VimPress::input(int c) {
           break;
         case 'w':
           mode = 'w';
-          save();
+          saveWithoutCompress();
           refresh();
           endwin();
           printf("%s saved.\n", filename.c_str());
+          exit(0);
+          break;
+        case 'c':
+          mode = 'c';
+          saveWithCompress();
+          refresh();
+          endwin();
+          printf("%s compress saved.\n", filename.c_str());
           exit(0);
           break;
       }
@@ -242,28 +251,95 @@ void VimPress::down() {
 }
 
 void VimPress::open() {
-  if (std::filesystem::exists(filename)) {
-    std::ifstream ifile(filename);
-    if (ifile.is_open()) {
-      while (!ifile.eof()) {
-        std::string buffer;
-        std::getline(ifile, buffer);
-        m_append(buffer);
-      }
+    if (std::filesystem::exists(filename)) {
+        std::filesystem::path filepath(filename);
+        if (std::filesystem::is_regular_file(filepath)) {
+            std::ifstream ifile(filename, std::ios::binary);
+            if (ifile.is_open()) {
+                std::string content((std::istreambuf_iterator<char>(ifile)),
+                                    (std::istreambuf_iterator<char>()));
+
+                if (filepath.extension() == CUSTOM_EXTENSION && openWithDecompress == "-c") {
+
+                    // Es un archivo .caju, descomprimir utilizando HuffmanCoding
+                    content = huffman.decompress(std::vector<unsigned char>(content.begin(), content.end()));
+                }
+
+                // Lógica para manejar el contenido del archivo, ya sea comprimido o no
+                m_append(content);
+
+            } else {
+                throw std::runtime_error("File could not be opened. Permission denied.");
+            }
+        } else {
+            throw std::runtime_error("Not a regular file.");
+        }
     } else {
-      throw std::runtime_error("File can not be open. Permission denied.");
+      std::string str {};
+      m_append(str);
     }
-  } else {
-    std::string str {};
-    m_append(str);
+}
+
+void VimPress::saveWithCompress() {
+  std::filesystem::path filepath(filename);
+  std::string extension = filepath.extension().string();
+
+  if ((extension == CUSTOM_EXTENSION && openWithDecompress == "-c") || (extension != CUSTOM_EXTENSION)) {
+    // Combinar todas las líneas en una sola cadena
+    std::string combinedLines;
+    for (const auto& line : lines) {
+      combinedLines += line + "\n"; // Agregar cada línea seguida de un salto de línea
+    }
+
+    // Comprimir el archivo utilizando HuffmanCoding
+    std::vector<unsigned char> compressedData = huffman.compress(combinedLines);
+
+    std::string newFilename = filename;
+    if (extension != CUSTOM_EXTENSION) {
+      newFilename += CUSTOM_EXTENSION;
+    }
+    // Guardar la cadena comprimida en el archivo
+    std::ofstream ofile(newFilename);  // Agregar la extensión comprimida al nombre del archivo
+    if ( ofile.is_open() ) {
+      // Escribir los datos comprimidos en el archivo
+      ofile.write(reinterpret_cast<const char*>(compressedData.data()), compressedData.size());
+      ofile.close();
+    } else {
+      refresh();
+      endwin();
+      std::printf("File can not be saved.\n");
+      exit(0);
+    }
+  }else {
+    std::ofstream ofile(filename);
+    if ( ofile.is_open() ) {
+      for (size_t i {}; i < lines.size(); ++i) {
+        ofile << lines[i] << std::endl;
+      }
+      ofile.close();
+    } else {
+      refresh();
+      endwin();
+      std::printf("File can not be saved.\n");
+      exit(0);
+    }
   }
 }
 
-void VimPress::save(){
-  std::ofstream ofile(filename);
+void VimPress::saveWithoutCompress(){
+  // Verificar la extensión del archivo
+  std::filesystem::path filepath(filename);
+  std::string extension = filepath.extension().string();
+  std::string newFilename = filename;
+  if (extension == CUSTOM_EXTENSION) {
+    filepath.replace_extension("");
+    newFilename = filepath.string();
+  }
+
+  std::ofstream ofile(newFilename);
   if ( ofile.is_open() ) {
     for (size_t i {}; i < lines.size(); ++i) {
-     ofile << lines[i] << std::endl;
+      ofile << lines[i] << std::endl;
     }
     ofile.close();
   } else {

@@ -7,7 +7,7 @@ NCURSES=-lncurses -ltinfo
 CXXFLAGS=$(DEBUG) $(OPT) $(WARN) $(NCURSES) -pipe
 LD=g++
 LDFLAGS=$(NCURSES)
-OBJS= main.o vimpress.o
+OBJS= main.o vimpress.o huffman.o
 all: $(OBJS)
 	$(LD) -o $(TARGET) $(OBJS) $(LDFLAGS)
 	@rm -rf *.o
@@ -17,3 +17,6 @@ main.o: main.cpp
  
 vimpress.o: vimpress.cpp
 	$(CXX) -c $(CXXFLAGS) vimpress.cpp  -o vimpress.o
+
+huffman.o: huffman.cpp
+	$(CXX) -c $(CXXFLAGS) huffman.cpp  -o huffman.o
