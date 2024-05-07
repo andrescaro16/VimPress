@@ -1,4 +1,5 @@
 #include "vimpress.hpp"
+#include <sstream>
 #include <iostream>
 
 VimPress::VimPress(const std::string &file, HuffmanCoding& huffmanObj, const std::string &openWithDecompressArg) : huffman(huffmanObj) {
@@ -266,8 +267,12 @@ void VimPress::open() {
                 }
 
                 // Lógica para manejar el contenido del archivo, ya sea comprimido o no
-                m_append(content);
-
+                std::stringstream contentStream(content);
+                std::string line;
+                while (std::getline(contentStream, line, '\n')) {
+                  // Process each line here (e.g., print it, store it in a vector)
+                  m_append(line);// Example: Print each line
+                } 
             } else {
                 throw std::runtime_error("File could not be opened. Permission denied.");
             }
@@ -288,7 +293,7 @@ void VimPress::saveWithCompress() {
     // Combinar todas las líneas en una sola cadena
     std::string combinedLines;
     for (const auto& line : lines) {
-      combinedLines += line + "\n"; // Agregar cada línea seguida de un salto de línea
+      combinedLines += line + '\n'; // Agregar cada línea seguida de un salto de línea
     }
 
     // Comprimir el archivo utilizando HuffmanCoding
